@@ -1,0 +1,25 @@
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./
+        with:
+          private_key: ${{ secrets.PGP_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PGP_PASSPHRASE }}
+          repository: password-store
+        env:
+          SECRET: pass://test/github-actions/first-secret
+          MULTILINE_SECRET: pass+multiline://test/github-actions/multiline-secret
+      - name: Print environment with masked secrets
+        run: printenv
+      - name: Test secret is set to correct value
+        run: if [ "$SECRET" != "phomah6weewuuPhuageChohl7Ahh3uup" ]; then echo "secret is not set as expected" && exit 1; fi
+      - name: Test multiline secret is set to correct value
+        env:
+          MULTILINE_SECRET_EXPECTED: |-
+            aatae6phib5shukaegheecoochu9Gahr
+            Yohsie2kao1Eph3iquieng4uboh3aifi
+        run: if [ "$MULTILINE_SECRET" != "$MULTILINE_SECRET_EXPECTED" ]; then echo "secret is not set as expected" && exit 1; fi
